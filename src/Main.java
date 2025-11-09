@@ -1,83 +1,90 @@
 import bank.*;
-
+import bank.exceptions.*;
 public class Main {
-
     public static void main(String[] args) {
+        try {
+            // PrivateBank erstellen
+            PrivateBank bank1 = new PrivateBank("Bank1", 0.05, 0.02);
+            PrivateBank bank2 = new PrivateBank("Bank2", 0.03, 0.01);
 
-        System.out.println("TEST: Payment & Transfer");
+            // Konten erstellen
+            bank1.createAccount("Alice");
+            bank2.createAccount("Bob");
 
-        // objekte erzeugen
-        Payment pIn = new Payment("01.01.2025", 1000.0, "Gehalt", 0.05, 0.10);
-        Payment pOut = new Payment("02.01.2025", -200.0, "Miete", 0.05, 0.10);
-        Payment pCopy = new Payment(pIn);
+            // Transaktionen erstellen
+            Payment p1 = new Payment("2025-11-08", 1000, "Deposit", 0.05, 0.02);
+            Payment p2 = new Payment("2025-11-08", -200, "Withdrawal", 0.05, 0.02);
 
-        Transfer t1 = new Transfer("03.01.2025", 150.0, "Essen", "Paul", "Maria");
-        Transfer t2 = new Transfer(t1);
+            Transfer t1 = new IncomingTransfer("2025-11-08", 500, "Gift", "Bob", "Alice");
+            Transfer t2 = new OutgoingTransfer("2025-11-08", 300, "Payment", "Alice", "Bob");
 
-        if (!t2.getDate().equals(t1.getDate())) {
-            System.out.println("Transfer Error in Copy Constructor");
-        }
-        if (t2.getAmount() != t1.getAmount()) {
-            System.out.println("Transfer Error in Copy Constructor");
-        }
-        if (!t2.getDescription().equals(t1.getDescription())) {
-            System.out.println("Transfer Error in Copy Constructor");
-        }
-        if (!t2.getRecipient().equals(t1.getRecipient())) {
-            System.out.println("Transfer Error in Copy Constructor");
-        }
-        if (!t2.getSender().equals(t1.getSender())) {
-            System.out.println("Transfer Error in Copy Constructor");
-        }
+            // Transaktionen hinzufügen
+            bank1.addTransaction("Alice", p1);
+            bank1.addTransaction("Alice", p2);
+            bank1.addTransaction("Alice", t1);
+            bank1.addTransaction("Alice", t2);
 
-        // calculate() testen
+            // Methoden testen
+            System.out.println("Kontostand Alice: " + bank1.getAccountBalance("Alice"));
+            System.out.println("Alle Transaktionen Alice:");
+            for (Transaction t : bank1.getTransactions("Alice")) {
+                System.out.println(t);
+            }
 
-        // Payment: Einzahlung
-        double expectedIn = 1000.0 - 1000.0 * 0.05;     // 950
-        assertDouble("Payment(Einzahlung)", expectedIn, pIn.calculate());
+            System.out.println("Positive Transaktionen Alice:");
+            for (Transaction t : bank1.getTransactionsByType("Alice", true)) {
+                System.out.println(t);
+            }
 
-        // Payment: Auszahlung
-        double expectedOut = -200.0 + (-200.0) * 0.10;  // -220
-        assertDouble("Payment(Auszahlung)", expectedOut, pOut.calculate());
+            System.out.println("Negative Transaktionen Alice:");
+            for (Transaction t : bank1.getTransactionsByType("Alice", false)) {
+                System.out.println(t);
+            }
 
-        // Payment Copy
-        assertDouble("Payment(Copy)", pIn.calculate(), pCopy.calculate());
+            System.out.println("Transaktionen sortiert (aufsteigend):");
+            for (Transaction t : bank1.getTransactionsSorted("Alice", true)) {
+                System.out.println(t);
+            }
 
-        // Transfer
-        assertDouble("Transfer", 150.0, t1.calculate());
+            // Fehlerfälle testen
+            try {
+                bank1.createAccount("Alice"); // sollte AccountAlreadyExistsException werfen
+            } catch (AccountAlreadyExistsException e) {
+                System.out.println("Fehler getestet: AccountAlreadyExistsException korrekt geworfen.");
+            }
 
-        // Transfer Copy
-        assertDouble("Transfer(Copy)", t1.calculate(), t2.calculate());
+            try {
+                Payment invalidPayment = new Payment("2025-11-08", 100, "Invalid", -0.1, 0.02);
+                bank1.addTransaction("Alice", invalidPayment);
+            } catch (TransactionAttributeException e) {
+                System.out.println("Fehler getestet: TransactionAttributeException für Payment korrekt geworfen.");
+            }
 
+            try {
+                Transfer invalidTransfer = new OutgoingTransfer("2025-11-08", -100, "Invalid", "Alice", "Bob");
+                bank1.addTransaction("Alice", invalidTransfer);
+            } catch (TransactionAttributeException e) {
+                System.out.println("Fehler getestet: TransactionAttributeException für Transfer korrekt geworfen.");
+            }
 
-        // equals() testen
-        assertBool("Payment Copy equals", true, pIn.equals(pCopy));
-        assertBool("Payment non-equals", false, pIn.equals(pOut));
+            // PrivateBank equals testen
+            PrivateBank copyTargetBank = new PrivateBank("copyMe", 0.1, 0.2);
+            PrivateBank copyMeBank = new PrivateBank(copyTargetBank);
+            System.out.println("copyTargetBank.equals(copyMeBank) = " + copyTargetBank.equals(copyMeBank)); // sollte true
+            // leicht verändern
+            copyTargetBank.setName("copyMeLOL");
+            System.out.println("copyTargetBank.equals(copyMeBank) = " + copyTargetBank.equals(copyMeBank)); // sollte false
 
-        assertBool("Transfer Copy equals", true, t1.equals(t2));
-        assertBool("Transfer non-equals", false, t1.equals(pIn));  // verschiedene Klassen
+            // PrivateBankAlt testen
+            PrivateBankAlt bankAlt = new PrivateBankAlt("AltBank", 0.04, 0.01);
+            bankAlt.createAccount("Charlie");
+            bankAlt.addTransaction("Charlie", new IncomingTransfer("2025-11-08", 250, "Deposit", "BankAlt", "Charlie"));
+            bankAlt.addTransaction("Charlie", new OutgoingTransfer("2025-11-08", 100, "Withdrawal", "Charlie", "BankAlt"));
 
+            System.out.println("Kontostand Charlie: " + bankAlt.getAccountBalance("Charlie"));
 
-        // toString()
-        System.out.println(pIn.toString());
-        System.out.println(t1.toString());
-    }
-
-    private static void assertDouble(String name, double expected, double actual) {
-        if (Math.abs(expected - actual) > 0.00001) {
-            System.out.printf("%s FAILED — expected %.2f, got %.2f%n", name, expected, actual);
-        }
-    }
-
-    private static void assertBool(String name, boolean expected, boolean actual) {
-        if (expected != actual) {
-            System.out.printf("%s FAILED — expected %b, got %b%n", name, expected, actual);
-        }
-    }
-
-    private static void assertNotNull(String name, Object value) {
-        if (value == null) {
-            System.out.printf("%s FAILED — value is null%n", name);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
