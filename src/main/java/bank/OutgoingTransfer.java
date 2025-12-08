@@ -48,4 +48,15 @@ public class OutgoingTransfer extends Transfer {
     public double calculate() {
         return -this.amount;
     }
+
+    /**
+     * Returns a string representation of the transfer, including date, amount, description, sender, and recipient.
+     *
+     * @return a string representation of the transfer
+     */
+    @Override
+    public String toString() {
+        return super.toString() + "\n --> OutgoingTransfer[" + "Sender: " + this.getSender() + "; "
+                + "Recipient: " + this.getRecipient() + ";" + "Calculated:" + this.calculate() + "]";
+    }
 }

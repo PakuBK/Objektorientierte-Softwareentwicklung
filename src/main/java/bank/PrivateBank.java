@@ -219,6 +219,31 @@ public class PrivateBank implements Bank {
         writeAccount(account, accountsToTransactions.get(account));
     }
 
+    public void deleteAccount(String account) throws AccountDoesNotExistException, IOException {
+        if (!accountsToTransactions.containsKey(account)) {
+            throw new AccountDoesNotExistException();
+        }
+
+        accountsToTransactions.remove(account);
+
+        try {
+            File file = new File(directoryName, "Konto " + account + ".json");
+            if (file.exists()) {
+                if (!file.delete()) {
+                    throw new IOException();
+                }
+
+            }
+        } catch (SecurityException e) {
+            throw new IOException();
+        }
+
+    }
+
+    public List<String> getAllAccounts() {
+        return new ArrayList<>(accountsToTransactions.keySet());
+    }
+
     /**
      * Adds a transaction to an already existing account.
      *
