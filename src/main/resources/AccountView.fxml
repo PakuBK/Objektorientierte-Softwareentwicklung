@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="bank.ui.AccountViewController"
+            prefHeight="600" prefWidth="800">
+
+    <top>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <!-- Header mit Account-Info -->
+            <HBox spacing="20" alignment="CENTER_LEFT">
+                <Button text="← Zurück" onAction="#handleBack"
+                        style="-fx-font-size: 14px;"/>
+                <Label fx:id="accountNameLabel"
+                       style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label text="Kontostand:"
+                       style="-fx-font-size: 16px;"/>
+                <Label fx:id="balanceLabel"
+                       style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            </HBox>
+
+            <Separator/>
+
+            <!-- Sortier- und Filter-Optionen -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Sortierung/Filter:"/>
+                <Button text="Aufsteigend" onAction="#handleSortAscending"/>
+                <Button text="Absteigend" onAction="#handleSortDescending"/>
+                <Button text="Nur Positive" onAction="#handleFilterPositive"/>
+                <Button text="Nur Negative" onAction="#handleFilterNegative"/>
+                <Button text="Alle anzeigen" onAction="#handleShowAll"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <Label text="Transaktionen:" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+
+            <ListView fx:id="transactionListView" VBox.vgrow="ALWAYS">
+                <contextMenu>
+                    <ContextMenu>
+                        <items>
+                            <MenuItem text="Löschen" onAction="#handleDeleteTransaction"/>
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </ListView>
+        </VBox>
+    </center>
+
+    <bottom>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+            <Button text="Neue Transaktion" onAction="#handleAddTransaction"
+                    style="-fx-font-size: 14px;"/>
+        </HBox>
+    </bottom>
+</BorderPane>
