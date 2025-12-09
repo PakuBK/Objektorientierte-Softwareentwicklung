@@ -71,9 +71,13 @@ public class AccountViewController {
     @FXML
     private void handleBack() {
         try {
-            String MAIN_PATH = "/MainView.fxml";
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(MAIN_PATH));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/bank/ui/MainView.fxml"));
             Scene scene = new Scene(loader.load());
+            
+            // Controller holen und PrivateBank übergeben
+            MainViewController controller = loader.getController();
+            controller.setPrivateBank(privateBank);
+            
             stage.setScene(scene);
         } catch (IOException e) {
             showError("Fehler beim Laden", e.getMessage());

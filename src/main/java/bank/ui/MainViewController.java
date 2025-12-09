@@ -16,6 +16,7 @@ import java.util.Optional;
 public class MainViewController {
 
     private final String ACCOUNT_VIEW_PATH = "/AccountView.fxml";
+    private final String MAIN_VIEW_PATH = "/bank/ui/MainView.fxml";
 
     @FXML
     private ListView<String> accountListView;
@@ -25,17 +26,35 @@ public class MainViewController {
 
     @FXML
     public void initialize() {
-        try {
-            // PrivateBank initialisieren (passen Sie den Pfad an!)
-            privateBank = new PrivateBank("SUPERBANK", 0.05, 0.1, "./accounts");
+        // Nur initialisieren, wenn noch keine Bank existiert
+        if (privateBank == null) {
+            try {
+                privateBank = new PrivateBank("SUPERBANK", 0.05, 0.1, "./accounts");
+            } catch (Exception e) {
+                showError("Fehler beim Laden der Bank", e.getMessage());
+                e.printStackTrace();
+                return;
+            }
+        }
 
-            // ObservableList für automatische UI-Updates
+        // Account-Liste aktualisieren
+        try {
             accountList = FXCollections.observableArrayList(privateBank.getAllAccounts());
             accountListView.setItems(accountList);
-
         } catch (Exception e) {
-            showError("Fehler beim Laden der Bank", e.getMessage());
+            showError("Fehler beim Laden der Accounts", e.getMessage());
             e.printStackTrace();
+        }
+    }
+
+    public void setPrivateBank(PrivateBank privateBank) {
+        this.privateBank = privateBank;
+        // Liste nach dem Setzen aktualisieren
+        try {
+            accountList = FXCollections.observableArrayList(privateBank.getAllAccounts());
+            accountListView.setItems(accountList);
+        } catch (Exception e) {
+            showError("Fehler beim Aktualisieren", e.getMessage());
         }
     }
 
